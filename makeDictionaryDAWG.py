@@ -3,7 +3,7 @@
 import sys
 import time
 
-DICTIONARY = "/words.txt"
+DICTIONARY = "wordList.txt"
 QUERY = sys.argv[1:]
 
 # This class represents a node in the directed acyclic word graph (DAWG). It
@@ -27,9 +27,9 @@ class DawgNode:
         else:
             arr.append("0")
 
-        for (label, node) in self.edges.iteritems():
-            arr.append( label )
-            arr.append( str( node.id ) )
+        for item in self.edges.items():
+            arr.append(item[0])
+            arr.append( str( item[1] ) )
 
         return "_".join(arr)
 
@@ -103,6 +103,7 @@ class Dawg:
         node = self.root
         for letter in word:
             if letter not in node.edges: return False
+            print(letter)
             node = node.edges[letter]
 
         return node.final
@@ -125,17 +126,16 @@ if __name__ == '__main__':
     for word in words:
         WordCount += 1
         dawg.insert(word)
-        if ( WordCount % 100 ) == 0: print "%dr" % WordCount,
+        if ( WordCount % 100 ) == 0: print(WordCount)
     dawg.finish()
-    print "Dawg creation took %g s" % (time.time()-start)
+    print("It took: " + str(time.time() - start))
 
     EdgeCount = dawg.edgeCount()
-    print "Read %d words into %d nodes and %d edges" % ( WordCount,
-            dawg.nodeCount(), EdgeCount )
-    print "This could be stored in as little as %d bytes" % (EdgeCount * 4)
+    print("Read " + str(WordCount) + " words into " + str(dawg.nodeCount()) + " nodes and " + str(EdgeCount) + " edges")
+    print("This could be stored in as little as " + str(EdgeCount * 4) + " bytes")
 
     for word in QUERY:
-        if not dawg.lookup( word ):
-            print "%s not in dictionary." % word
+        if not dawg.lookup( word.upper() ):
+            print(word + " not in dictionary.")
         else:
-            print "%s is in the dictionary." % word
+            print(word + " is in the dictionary.")

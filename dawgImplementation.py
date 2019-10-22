@@ -100,16 +100,17 @@ class Dawg:
         return True, node.neighbors.keys()
 
     def lookupStartOptions(self, wordEnd):
+        print(wordEnd + " :is word end")
         wordEnd = wordEnd.upper()
+        finalList = []
         options = list(string.ascii_uppercase)
-        print(options)
-        for x in range(len(options) - 1, 0, -1):
-            temp = options[x] + wordEnd
-            if not self.lookup(temp, None):
-                options.pop()
-        if len(options) == 0:
+        for x in options:
+            temp = x + wordEnd
+            if self.lookup(temp, None):
+                finalList.append(x)
+        if len(finalList) == 0:
             return False, []
-        return True, options
+        return True, finalList
 
     def lookupBoth(self, wordStart, wordEnd):
         wordStart = wordStart.upper()

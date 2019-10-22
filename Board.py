@@ -10,6 +10,8 @@ class Board:
         self.boardState = [[Square.Square() for x in range(15)] for y in range(15)]
         self.adjacentBitVector = [[0 for x in range(15)] for y in range(15)]
         self.dictionary = pickle.load(open("pickleDict.p", "rb"))
+        self.robotRack = []
+        self.moveList = []
 
     def __str__(self):
         returnString = ""
@@ -39,7 +41,9 @@ class Board:
         else:
             raise Exception("Tile must be of length 1 and position must be empty")
         self.updateAdjacenyOfTile(row + 1, col)
+        self.boardState[row + 1][col].setAnchor()
         self.updateAdjacenyOfTile(row - 1, col)
+        self.boardState[row - 1][col].setAnchor()
 
 
     def updateAdjacenyOfTile(self, row, col):
@@ -66,8 +70,10 @@ class Board:
                 if hasDowns[0]:
                     options += hasDowns[1]
         value = 0
+        print("options: " + str(options))
         for option in options:
             tempVal = ord(option) - ord('A')
+            print(tempVal)
             if tempVal >= 0 and tempVal < 26:
                 num = 1 << tempVal
             value = value | num
@@ -105,17 +111,54 @@ class Board:
             return ""
         return wordStart
 
-    def test(self):
-        print("bruh")
+    def bitVectorToList(self, value):
+        offset = 0
+        result = []
+        while value != 0:
+            print(value & 1)
+            result.append(value & 1 + offset)
+            value = value & ~1
+            value = value >> 1
+            offset += 1
+        return result
+'''
+    def listPlays(self):
+        for rowIndex in range(len(self.boardState)):
+            k = 0
+            for colIndex in range(len(row[0])):
+                if row[colIndex].isAnchor():
+                    leftPart("", self.dictionary.root, k, rowIndex, colIndex)
+                    k = 0
+                else:
+                    k += 1
 
+    def extendRight(self, partialWord, node, row, col)
+        if self.boardState[row][col].isEmpty():
+            if node.endsWord:
+                #found legal move
+                self.moveList.append(partialWord)
+            for e in node.neighbors:
+                if e in self.robotRack and e in
+
+    def leftPart(self, partialWord, node, limit, row, col):
+        self.extendRight(partialWord, node, row, col)
+        if limit > 0:
+            for e in node.neighbors:
+                if e in self.robotRack:
+                    self.robotRack.remove(e)
+                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col)
+                    self.robotRack.append(e)
+'''
 if __name__ == '__main__':
 
     game = Board()
     game.addTile('A', 2, 4)
-    #game.addTile('Y', 3, 4)
-    game.addTile('O', 3, 5)
-    game.addTile('E', 4, 4)
+    game.addTile('Y', 3, 4)
+    #game.addTile('O', 3, 5)
+    #game.addTile('E', 4, 4)
     print(game)
     game._printAdjacency()
+    print(game.bitVectorToList(game.adjacentBitVector[1][4]))
+
 
     #print(game.test("bike"))

@@ -2,6 +2,7 @@ class Square:
 
     def __init__(self, letter = ""):
         self.letter = letter
+        self.anchor = False
 
     def __str__(self):
         if self.letter == "":
@@ -14,6 +15,12 @@ class Square:
 
     def isNotEmpty(self):
         return not self.isEmpty()
+
+    def isAnchor(self):
+        return self.anchor
+
+    def setAnchor(self, isAnchor = True):
+        self.anchor = isAnchor
 
     def add(self, newLetter):
         self.letter = newLetter

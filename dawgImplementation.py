@@ -79,9 +79,11 @@ class Dawg:
                 self.trimmedNodes[child] = child
             self.freshNodes.pop()
 
-    def lookup(self, word):
+    def lookup(self, word, startNode):
+        if not startNode:
+            startNode = self.root
         word = word.upper()
-        node = self.root
+        node = startNode
         for letter in word:
             if letter not in node.neighbors:
                 return False
@@ -93,20 +95,38 @@ class Dawg:
         node = self.root
         for letter in wordStart:
             if letter not in node.neighbors:
-                return False
+                return False, []
             node = node.neighbors[letter]
         return True, node.neighbors.keys()
 
     def lookupStartOptions(self, wordEnd):
         wordEnd = wordEnd.upper()
         options = list(string.ascii_uppercase)
-        for x in range(len(options), 0, -1):
+        print(options)
+        for x in range(len(options) - 1, 0, -1):
             temp = options[x] + wordEnd
-            if not lookup(temp):
+            if not self.lookup(temp, None):
                 options.pop()
         if len(options) == 0:
-            return False
+            return False, []
         return True, options
+
+    def lookupBoth(self, wordStart, wordEnd):
+        wordStart = wordStart.upper()
+        node = self.root
+        for letter in wordStart:
+            if letter not in node.neighbors:
+                return False, []
+            node = node.neighbors[letter]
+        # node now equals node after end of wordStart
+        options = list(string.ascii_uppercase)
+        finalOptions = []
+        for option in options:
+            if self.lookup(option + wordEnd, node):
+                finalOptions.append(option)
+        if len(finalOptions) == 0:
+            return False, []
+        return True, finalOptions
 
     def numNodes(self):
         return len(self.trimmedNodes)

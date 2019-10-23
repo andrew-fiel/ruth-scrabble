@@ -100,7 +100,6 @@ class Dawg:
         return True, node.neighbors.keys()
 
     def lookupStartOptions(self, wordEnd):
-        print(wordEnd + " :is word end")
         wordEnd = wordEnd.upper()
         finalList = []
         options = list(string.ascii_uppercase)

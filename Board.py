@@ -2,6 +2,7 @@ import dawgImplementation
 import pickle
 import time
 import Square
+import Move
 
 
 
@@ -103,7 +104,6 @@ class Board:
                 if hasDowns[0]:
                     options += hasDowns[1]
         value = 0
-        print("options: " + str(options))
         for option in options:
             tempVal = ord(option) - ord('A')
             if tempVal >= 0 and tempVal < 26:
@@ -156,26 +156,25 @@ class Board:
 
     def listPlays(self):
         self.moveList.clear()
-        for rowIndex in range(len(self.boardState)):
-            k = 0
-            for colIndex in range(len(self.boardState[0])):
-                if self.boardState[rowIndex][colIndex].isAnchor():
-                    if colIndex > 0 and self.boardState[rowIndex][colIndex - 1].isNotEmpty():
-                        iterNode = self.dictionary.root
-                        wordStart = self._findWordStart(rowIndex, colIndex, 4)
-                        for l in wordStart:
-                            if l not in iterNode.neighbors:
-                                raise Exception("Illegal word on board")
-                            iterNode = iterNode.neighbors[l]
-                            print("It be: " + l)
-                        self.extendRight(wordStart, iterNode, rowIndex, colIndex)
-                    else:
-                        self.leftPart("", self.dictionary.root, k, rowIndex, colIndex)
-                        print(k)
-                    k = 0
-
+        #for rowIndex in range(len(self.boardState)):
+        rowIndex = 2
+        k = 0
+        for colIndex in range(len(self.boardState[0])):
+            if self.boardState[rowIndex][colIndex].isAnchor():
+                if colIndex > 0 and self.boardState[rowIndex][colIndex - 1].isNotEmpty():
+                    iterNode = self.dictionary.root
+                    wordStart = self._findWordStart(rowIndex, colIndex, 4)
+                    for l in wordStart:
+                        if l not in iterNode.neighbors:
+                            raise Exception("Illegal word on board")
+                        iterNode = iterNode.neighbors[l]
+                    self.extendRight(wordStart, iterNode, rowIndex, colIndex, True)
                 else:
-                    k += 1
+                    self.leftPart("", self.dictionary.root, k, rowIndex, colIndex)
+                k = 0
+
+            else:
+                k += 1
 
     def crossCheckContains(self, letter, row, col):
         value = self.adjacentBitVector[row][col]
@@ -185,13 +184,15 @@ class Board:
             return True
         return False
 
-    def extendRight(self, partialWord, node, row, col):
+    def extendRight(self, partialWord, node, row, col, firstAnchor = False):
         if row > 14:
             return
         if self.boardState[row][col].isEmpty():
-            if node.endsWord:
+            if node.endsWord and not firstAnchor:
                 #found legal move
-                self.moveList.append(partialWord)
+
+                foundMove = Move.Move(partialWord, row, col - 1)
+                self.moveList.append(str(foundMove))
             for e in node.neighbors:
                 if e in self.robotRack and self.crossCheckContains(e, row, col):
                     self.robotRack.remove(e)
@@ -202,7 +203,7 @@ class Board:
                 self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1)
 
     def leftPart(self, partialWord, node, limit, row, col):
-        self.extendRight(partialWord, node, row, col)
+        self.extendRight(partialWord, node, row, col, True)
         if limit > 0:
             for e in node.neighbors:
                 if e in self.robotRack:
@@ -213,12 +214,12 @@ class Board:
 if __name__ == '__main__':
 
     game = Board()
-    game.addTile('T', 2, 4)
-    game.addTile('U', 2, 5)
-    game.addTile('N', 2, 6)
-    game.addTile('A', 2, 7)
+    #game.addTile('B', 2, 4)
+    game.addTile('A', 2, 1)
+    #game.addTile('N', 2, 6)
+    #game.addTile('A', 2, 7)
     print(game)
-    game.robotRack = ['F', 'I', 'S', 'H']
+    game.robotRack = ['D', 'B']
     game.listPlays()
     print(game.moveList)
 

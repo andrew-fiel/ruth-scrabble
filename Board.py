@@ -8,7 +8,8 @@ import Square
 class Board:
     def __init__(self):
         self.boardState = [[Square.Square() for x in range(15)] for y in range(15)]
-        self.adjacentBitVector = [[0 for x in range(15)] for y in range(15)]
+        #67108863 is bit vector of every letter
+        self.adjacentBitVector = [[67108863 for x in range(15)] for y in range(15)]
         self.dictionary = pickle.load(open("pickleDict.p", "rb"))
         self.robotRack = []
         self.moveList = []
@@ -218,7 +219,6 @@ if __name__ == '__main__':
     #game.addTile('E', 4, 4)
     print(game)
     game.robotRack = ['B', 'D']
-    game.adjacentBitVector[2][5] = 8
     game.listPlays()
     print(game.moveList)
     game._printAnchor()

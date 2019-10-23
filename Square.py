@@ -21,9 +21,12 @@ class Square:
 
     def setAnchor(self, isAnchor = True):
         self.anchor = isAnchor
+        if self.isNotEmpty():
+            self.anchor = False
 
     def add(self, newLetter):
         self.letter = newLetter
+        self.anchor = False
 
     def remove(self):
         self.letter = ""

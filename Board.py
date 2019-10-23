@@ -32,6 +32,18 @@ class Board:
             returnString += "|\n"
         print(returnString)
 
+    def _printAnchor(self):
+        returnString = ""
+        for row in self.boardState:
+            for unit in row:
+                if unit.isAnchor():
+                    val = 1
+                else:
+                    val = 0
+                returnString += '|' + str(val)
+            returnString += "|\n"
+        print(returnString)
+
     def getBoardState(self):
         return self.boardState
 
@@ -40,11 +52,31 @@ class Board:
             self.boardState[row][col].add(letter)
         else:
             raise Exception("Tile must be of length 1 and position must be empty")
-        self.updateAdjacenyOfTile(row + 1, col)
-        self.boardState[row + 1][col].setAnchor()
-        self.updateAdjacenyOfTile(row - 1, col)
-        self.boardState[row - 1][col].setAnchor()
 
+        self.updateAdjacenyOfTile(row + 1, col)
+        self.updateAdjacenyOfTile(row - 1, col)
+
+        self.boardState[row + 1][col].setAnchor()
+        self.boardState[row - 1][col].setAnchor()
+        self.boardState[row][col + 1].setAnchor()
+        self.boardState[row][col - 1].setAnchor()
+        changeRow = row
+
+        #if there is a word bellow, follow it and update the adj of the closest free space
+        if self.boardState[changeRow + 1][col].isNotEmpty():
+            while changeRow < 14:
+                changeRow += 1
+                if self.boardState[changeRow + 1][col].isEmpty():
+                    self.updateAdjacenyOfTile(changeRow + 1, col)
+                    break
+        #if there is a word above, follow it and update the adj of the closest free space
+        changeRow = row
+        if self.boardState[changeRow - 1][col].isNotEmpty():
+            while changeRow > 0:
+                changeRow -= 1
+                if self.boardState[changeRow - 1][col].isEmpty():
+                    self.updateAdjacenyOfTile(changeRow - 1, col)
+                    break
 
     def updateAdjacenyOfTile(self, row, col):
         options = []
@@ -73,12 +105,10 @@ class Board:
         print("options: " + str(options))
         for option in options:
             tempVal = ord(option) - ord('A')
-            print(tempVal)
             if tempVal >= 0 and tempVal < 26:
                 num = 1 << tempVal
             value = value | num
         self.adjacentBitVector[row][col] = value
-        print(str(value) + " row, col: " + str(row) + " " + str(col) )
 
 
 
@@ -89,56 +119,86 @@ class Board:
         wordStart += self.boardState[row][col].get()
         if direction == 1:
             #up
-            while row > 0 and self.boardState[row - 1][col].get() != " ":
+            while row > 0 and self.boardState[row - 1][col].isNotEmpty():
                 wordStart = self.boardState[row - 1][col].get() + wordStart
                 row -= 1
         elif direction == 2:
             #right
-            while col < 14 and self.boardState[row][col + 1].get() != " ":
+            while col < 14 and self.boardState[row][col + 1].isNotEmpty():
                 wordStart += self.boardState[row][col + 1].get()
                 col += 1
         elif direction == 3:
             #down
-            while row < 14 and self.boardState[row + 1][col].get() != " ":
+            while row < 14 and self.boardState[row + 1][col].isNotEmpty():
                 wordStart += self.boardState[row + 1][col].get()
                 row += 1
         elif direction == 4:
             #left
-            while col > 0 and self.boardState[row][col - 1].get() != " ":
+            while col > 0 and self.boardState[row][col - 1].isNotEmpty():
                 wordStart = self.boardState[row][col - 1].get() + wordStart
                 col -= 1
         else:
             return ""
         return wordStart
 
-    def bitVectorToList(self, value):
+    def _bitVectorToList(self, value):
         offset = 0
         result = []
         while value != 0:
-            print(value & 1)
-            result.append(value & 1 + offset)
+            if(value & 1 != 0):
+                temp = offset + ord('A')
+                result.append(chr(temp))
             value = value & ~1
             value = value >> 1
             offset += 1
         return result
-'''
+
     def listPlays(self):
+        self.moveList.clear()
         for rowIndex in range(len(self.boardState)):
             k = 0
-            for colIndex in range(len(row[0])):
-                if row[colIndex].isAnchor():
-                    leftPart("", self.dictionary.root, k, rowIndex, colIndex)
+            for colIndex in range(len(self.boardState[0])):
+                if self.boardState[rowIndex][colIndex].isAnchor():
+                    if colIndex > 0 and self.boardState[rowIndex][colIndex - 1].isNotEmpty():
+                        iterNode = self.dictionary.root
+                        wordStart = self._findWordStart(rowIndex, colIndex, 4)
+                        for l in wordStart:
+                            if l not in iterNode.neighbors:
+                                raise Exception("Illegal word on board")
+                            iterNode = iterNode.neighbors[l]
+                            print("It be: " + l)
+                        self.extendRight(wordStart, iterNode, rowIndex, colIndex)
+                    else:
+                        self.leftPart("", self.dictionary.root, k, rowIndex, colIndex)
+                        print(k)
                     k = 0
+
                 else:
                     k += 1
 
-    def extendRight(self, partialWord, node, row, col)
+    def crossCheckContains(self, letter, row, col):
+        value = self.adjacentBitVector[row][col]
+        shiftAmount = ord(letter) - ord('A')
+        if ((1 << shiftAmount) & value) != 0:
+            #in bit vector
+            return True
+        return False
+
+    def extendRight(self, partialWord, node, row, col):
+        if row > 14:
+            return
         if self.boardState[row][col].isEmpty():
             if node.endsWord:
                 #found legal move
                 self.moveList.append(partialWord)
             for e in node.neighbors:
-                if e in self.robotRack and e in
+                if e in self.robotRack and self.crossCheckContains(e, row, col):
+                    self.robotRack.remove(e)
+                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1)
+                    self.robotRack.append(e)
+        else:
+            if self.boardState[row][col].get() in node.neighbors:
+                self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1)
 
     def leftPart(self, partialWord, node, limit, row, col):
         self.extendRight(partialWord, node, row, col)
@@ -148,17 +208,22 @@ class Board:
                     self.robotRack.remove(e)
                     self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col)
                     self.robotRack.append(e)
-'''
+
 if __name__ == '__main__':
 
     game = Board()
     game.addTile('A', 2, 4)
-    game.addTile('Y', 3, 4)
+    #game.addTile('Y', 3, 4)
     #game.addTile('O', 3, 5)
     #game.addTile('E', 4, 4)
     print(game)
-    game._printAdjacency()
-    print(game.bitVectorToList(game.adjacentBitVector[1][4]))
+    game.robotRack = ['B', 'D']
+    game.adjacentBitVector[2][5] = 8
+    game.listPlays()
+    print(game.moveList)
+    game._printAnchor()
+
+
 
 
     #print(game.test("bike"))

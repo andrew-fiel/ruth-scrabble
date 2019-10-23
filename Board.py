@@ -213,15 +213,14 @@ class Board:
 if __name__ == '__main__':
 
     game = Board()
-    game.addTile('A', 2, 4)
-    #game.addTile('Y', 3, 4)
-    #game.addTile('O', 3, 5)
-    #game.addTile('E', 4, 4)
+    game.addTile('T', 2, 4)
+    game.addTile('U', 2, 5)
+    game.addTile('N', 2, 6)
+    game.addTile('A', 2, 7)
     print(game)
-    game.robotRack = ['B', 'D']
+    game.robotRack = ['F', 'I', 'S', 'H']
     game.listPlays()
     print(game.moveList)
-    game._printAnchor()
 
 
 

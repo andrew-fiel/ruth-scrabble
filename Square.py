@@ -3,6 +3,7 @@ class Square:
     def __init__(self, letter = ""):
         self.letter = letter
         self.anchor = False
+        self.sideScore = 0
 
     def __str__(self):
         if self.letter == "":

@@ -165,13 +165,17 @@ class Board:
             for colIndex in range(len(self.boardState[0])):
                 if self.boardState[rowIndex][colIndex].isAnchor():
                     if colIndex > 0 and self.boardState[rowIndex][colIndex - 1].isNotEmpty():
+                        workingScore = 0
                         iterNode = self.dictionary.root
+                        # 4 means look left
                         wordStart = self._findWordStart(rowIndex, colIndex, 4)
-                        for l in wordStart:
-                            if l not in iterNode.neighbors:
+                        for x in range(len(wordStart)):
+                            currentSquare = self.boardState[rowIndex][colIndex - 1 - x]
+                            if currentSquare.get() not in iterNode.neighbors:
                                 raise Exception("Illegal word on board")
-                            iterNode = iterNode.neighbors[l]
-                        self.extendRight(wordStart, iterNode, rowIndex, colIndex, True, 0)
+                            iterNode = iterNode.neighbors[currentSquare.get()]
+                            workingScore = workingScore + self.letterMupltiplier(currentSquare.special) * self.wordToScore(currentSquare.get())
+                        self.extendRight(wordStart, iterNode, rowIndex, colIndex, True, workingScore)
                     else:
                         self.leftPart("", self.dictionary.root, k, rowIndex, colIndex)
                     k = 0
@@ -203,33 +207,37 @@ class Board:
             sum += valueDict[letter]
         return sum
 
+    def letterMupltiplier(self, valueCode):
+        multDict = {
+            'NA': 1,
+            'DL': 2,
+            'TL': 3
+        }
+        return multDict.get(valueCode, 1)
+
     def extendRight(self, partialWord, node, row, col, firstAnchor, scoreSum):
         if row > 14:
             return
         if self.boardState[row][col].isEmpty():
             if node.endsWord and not firstAnchor:
                 #found legal move
-                #score for word added itself
-                score = self.wordToScore(partialWord)
-                #score for other words made
-                score += scoreSum
-
-                foundMove = Move.Move(partialWord, row, col - 1, score)
+                foundMove = Move.Move(partialWord, row, col - 1, scoreSum)
                 self.moveList.append(foundMove)
             for e in node.neighbors:
                 if e in self.robotRack and self.crossCheckContains(e, row, col):
                     self.robotRack.remove(e)
-                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, scoreSum + self.boardState[row][col].sideScore)
+                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, scoreSum + self.boardState[row][col].sideScore + self.letterMupltiplier(self.boardState[row][col].special) * self.wordToScore(e))
                     self.robotRack.append(e)
         else:
             if self.boardState[row][col].get() in node.neighbors:
-                self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, scoreSum)
+                self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, scoreSum  + self.wordToScore(self.boardState[row][col].get()))
 
-    def leftPart(self, partialWord, node, limit, row, col):
-        self.extendRight(partialWord, node, row, col, True, 0)
+    def leftPart(self, partialWord, node, limit, row, col, score = 0):
+        self.extendRight(partialWord, node, row, col, True, score)
         if limit > 0:
             for e in node.neighbors:
                 if e in self.robotRack:
                     self.robotRack.remove(e)
-                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col)
+
+                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col, score + self.wordToScore(e))
                     self.robotRack.append(e)

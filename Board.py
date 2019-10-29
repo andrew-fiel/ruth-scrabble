@@ -8,6 +8,63 @@ import pickle
 class Board:
     def __init__(self):
         self.boardState = [[Square.Square() for x in range(15)] for y in range(15)]
+        #Place x of pink Double Word score
+        for row in range(15):
+            for col in range(15):
+                if row == col:
+                    self.boardState[row][col].special = "DW"
+                if 14 - col == row:
+                    self.boardState[row][col].special = "DW"
+        #Place the rest manually because weird patterns
+        self.boardState[0][0].special = "TW"
+        self.boardState[0][7].special = "TW"
+        self.boardState[0][14].special = "TW"
+        self.boardState[7][0].special = "TW"
+        self.boardState[7][14].special = "TW"
+        self.boardState[14][0].special = "TW"
+        self.boardState[14][7].special = "TW"
+        self.boardState[14][14].special = "TW"
+
+        self.boardState[0][3].special = "DL"
+        self.boardState[0][11].special = "DL"
+        self.boardState[2][6].special = "DL"
+        self.boardState[2][8].special = "DL"
+        self.boardState[3][0].special = "DL"
+        self.boardState[3][7].special = "DL"
+        self.boardState[3][14].special = "DL"
+        self.boardState[6][2].special = "DL"
+        self.boardState[6][6].special = "DL"
+        self.boardState[6][8].special = "DL"
+        self.boardState[6][12].special = "DL"
+        self.boardState[7][3].special = "DL"
+        self.boardState[7][11].special = "DL"
+        self.boardState[8][2].special = "DL"
+        self.boardState[8][6].special = "DL"
+        self.boardState[8][8].special = "DL"
+        self.boardState[8][12].special = "DL"
+        self.boardState[11][0].special = "DL"
+        self.boardState[11][7].special = "DL"
+        self.boardState[11][14].special = "DL"
+        self.boardState[12][6].special = "DL"
+        self.boardState[12][8].special = "DL"
+        self.boardState[14][3].special = "DL"
+        self.boardState[14][11].special = "DL"
+
+        self.boardState[1][5].special = "TL"
+        self.boardState[1][9].special = "TL"
+        self.boardState[5][1].special = "TL"
+        self.boardState[5][5].special = "TL"
+        self.boardState[5][9].special = "TL"
+        self.boardState[5][13].special = "TL"
+        self.boardState[9][1].special = "TL"
+        self.boardState[9][5].special = "TL"
+        self.boardState[9][9].special = "TL"
+        self.boardState[9][13].special = "TL"
+        self.boardState[13][5].special = "TL"
+        self.boardState[13][9].special = "TL"
+
+        self.boardState[7][7].setAnchor()
+
         #67108863 is bit vector of every letter
         self.adjacentBitVector = [[67108863 for x in range(15)] for y in range(15)]
         self.dictionary = pickle.load(open("pickleDict.p", "rb"))
@@ -45,6 +102,14 @@ class Board:
             returnString += "|\n"
         print(returnString)
 
+    def _printSpecial(self):
+        returnString = ""
+        for row in self.boardState:
+            for unit in row:
+                returnString += '|' + unit.special
+            returnString += "|\n"
+        print(returnString)
+
     def getBoardState(self):
         return self.boardState
 
@@ -56,11 +121,14 @@ class Board:
 
         self.updateAdjacenyOfTile(row + 1, col)
         self.updateAdjacenyOfTile(row - 1, col)
-
-        self.boardState[row + 1][col].setAnchor()
-        self.boardState[row - 1][col].setAnchor()
-        self.boardState[row][col + 1].setAnchor()
-        self.boardState[row][col - 1].setAnchor()
+        if self.boardState[row + 1][col].isEmpty():
+            self.boardState[row + 1][col].setAnchor()
+        if self.boardState[row - 1][col].isEmpty():
+            self.boardState[row - 1][col].setAnchor()
+        if self.boardState[row][col + 1].isEmpty():
+            self.boardState[row][col + 1].setAnchor()
+        if self.boardState[row][col - 1].isEmpty():
+            self.boardState[row][col - 1].setAnchor()
         changeRow = row
 
         #if there is a word bellow, follow it and update the adj of the closest free space
@@ -159,6 +227,7 @@ class Board:
         return result
 
     def listPlays(self):
+        self._printSpecial()
         self.moveList.clear()
         for rowIndex in range(len(self.boardState)):
             k = 0
@@ -169,12 +238,14 @@ class Board:
                         iterNode = self.dictionary.root
                         # 4 means look left
                         wordStart = self._findWordStart(rowIndex, colIndex, 4)
-                        for x in range(len(wordStart)):
-                            currentSquare = self.boardState[rowIndex][colIndex - 1 - x]
+                        print(wordStart)
+                        for x in range(colIndex - len(wordStart), colIndex):
+                            currentSquare = self.boardState[rowIndex][x]
                             if currentSquare.get() not in iterNode.neighbors:
                                 raise Exception("Illegal word on board")
                             iterNode = iterNode.neighbors[currentSquare.get()]
                             workingScore = workingScore + self.letterMupltiplier(currentSquare.special) * self.wordToScore(currentSquare.get())
+
                         self.extendRight(wordStart, iterNode, rowIndex, colIndex, True, workingScore)
                     else:
                         self.leftPart("", self.dictionary.root, k, rowIndex, colIndex)

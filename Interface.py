@@ -28,9 +28,7 @@ class Ruth:
 
 if __name__ == '__main__':
     game = Ruth()
-    game._addTile('C', 5, 3)
-    game._addTile('A', 5, 4)
     print(game)
-    game._setRack(['B', 'T', 'D'])
+    game._setRack(['A','E','I','O','U','Y','W'])
     for move in game._generatePlayList():
         print(str(move))

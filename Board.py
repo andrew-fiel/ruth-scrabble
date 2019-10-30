@@ -2,6 +2,8 @@ import dawgImplementation
 import Move
 import Square
 import pickle
+import Score
+import copy
 
 
 
@@ -63,7 +65,8 @@ class Board:
         self.boardState[13][5].special = "TL"
         self.boardState[13][9].special = "TL"
 
-        self.boardState[7][7].setAnchor()
+        #enable first play of the game
+        #self.boardState[7][7].setAnchor()
 
         #67108863 is bit vector of every letter
         self.adjacentBitVector = [[67108863 for x in range(15)] for y in range(15)]
@@ -227,28 +230,27 @@ class Board:
         return result
 
     def listPlays(self):
-        self._printSpecial()
         self.moveList.clear()
         for rowIndex in range(len(self.boardState)):
             k = 0
             for colIndex in range(len(self.boardState[0])):
                 if self.boardState[rowIndex][colIndex].isAnchor():
+                    score = Score.Score()
                     if colIndex > 0 and self.boardState[rowIndex][colIndex - 1].isNotEmpty():
-                        workingScore = 0
                         iterNode = self.dictionary.root
                         # 4 means look left
                         wordStart = self._findWordStart(rowIndex, colIndex, 4)
-                        print(wordStart)
                         for x in range(colIndex - len(wordStart), colIndex):
                             currentSquare = self.boardState[rowIndex][x]
                             if currentSquare.get() not in iterNode.neighbors:
                                 raise Exception("Illegal word on board")
                             iterNode = iterNode.neighbors[currentSquare.get()]
-                            workingScore = workingScore + self.letterMupltiplier(currentSquare.special) * self.wordToScore(currentSquare.get())
-
-                        self.extendRight(wordStart, iterNode, rowIndex, colIndex, True, workingScore)
+                            adding = self.wordToScore(currentSquare.get())
+                            print("in list adding " + str(adding))
+                            score.word += adding
+                        self.extendRight(wordStart, iterNode, rowIndex, colIndex, True, score)
                     else:
-                        self.leftPart("", self.dictionary.root, k, rowIndex, colIndex)
+                        self.leftPart("", self.dictionary.root, k, rowIndex, colIndex, score)
                     k = 0
 
                 else:
@@ -286,29 +288,36 @@ class Board:
         }
         return multDict.get(valueCode, 1)
 
-    def extendRight(self, partialWord, node, row, col, firstAnchor, scoreSum):
+    def extendRight(self, partialWord, node, row, col, firstAnchor, score):
         if row > 14:
             return
         if self.boardState[row][col].isEmpty():
             if node.endsWord and not firstAnchor:
                 #found legal move
-                foundMove = Move.Move(partialWord, row, col - 1, scoreSum)
+                foundMove = Move.Move(partialWord, row, col - 1, score)
                 self.moveList.append(foundMove)
             for e in node.neighbors:
                 if e in self.robotRack and self.crossCheckContains(e, row, col):
                     self.robotRack.remove(e)
-                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, scoreSum + self.boardState[row][col].sideScore + self.letterMupltiplier(self.boardState[row][col].special) * self.wordToScore(e))
+                    letterScore = self.letterMupltiplier(self.boardState[row][col].special) * self.wordToScore(e)
+                    sidePartScore = self.boardState[row][col].sideScore
+                    score.word += letterScore
+                    score.sideParts += sidePartScore
+                    print(str(score.word) + " adding " + str(letterScore) + " for " + str(e) + " at word " + partialWord)
+                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, copy.deepcopy(score))
                     self.robotRack.append(e)
         else:
             if self.boardState[row][col].get() in node.neighbors:
-                self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, scoreSum  + self.wordToScore(self.boardState[row][col].get()))
+                score.word += self.wordToScore(self.boardState[row][col].get())
+                self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, copy.deepcopy(score))
 
-    def leftPart(self, partialWord, node, limit, row, col, score = 0):
+    def leftPart(self, partialWord, node, limit, row, col, score):
         self.extendRight(partialWord, node, row, col, True, score)
         if limit > 0:
             for e in node.neighbors:
                 if e in self.robotRack:
                     self.robotRack.remove(e)
-
-                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col, score + self.wordToScore(e))
+                    letterScoreNoMult = self.wordToScore(self.boardState[row][col].get())
+                    score.word += letterScoreNoMult
+                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col, copy.deepcopy(score))
                     self.robotRack.append(e)

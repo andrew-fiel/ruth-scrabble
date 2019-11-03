@@ -20,6 +20,7 @@ class Ruth:
         for move in self.verticalBoard.moveList:
             move.transpose()
         playList = self.horizontalBoard.moveList + self.verticalBoard.moveList
+        list.sort(playList, key=lambda play: play.score.totalVal(), reverse = True)
         return playList
 
     def _setRack(self, rack):
@@ -28,9 +29,10 @@ class Ruth:
 
 if __name__ == '__main__':
     game = Ruth()
-    game._addTile('C', 5, 3)
-    game._addTile('A', 5, 4)
+    game._addTile('T', 6, 5)
+    game._addTile('H', 6, 6)
+    game._addTile('I', 6, 7)
     print(game)
-    game._setRack(['B', 'T', 'D'])
+    game._setRack(['N','K','S'])
     for move in game._generatePlayList():
         print(str(move))

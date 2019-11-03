@@ -1,9 +1,18 @@
 class Square:
 
-    def __init__(self, letter = ""):
+    def __init__(self, letter = "", special = "NA"):
         self.letter = letter
         self.anchor = False
         self.sideScore = 0
+
+        #SPECIAL SQUARE VALUES
+        #NA -- None / Regular Tile
+        #DL -- Double Letter Score
+        #TL -- Triple Letter Score
+        #DW -- Double Word Score
+        #TW -- Triple Word Score
+
+        self.special = special
 
     def __str__(self):
         if self.letter == "":

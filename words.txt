@@ -1,9 +1,0 @@
-apple
-bike
-cat
-dog
-elephant
-frank
-girl
-hat
-it

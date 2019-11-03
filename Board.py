@@ -122,29 +122,32 @@ class Board:
         else:
             raise Exception("Tile must be of length 1 and position must be empty")
 
-        self.updateAdjacenyOfTile(row + 1, col)
-        self.updateAdjacenyOfTile(row - 1, col)
-        if self.boardState[row + 1][col].isEmpty():
+        if row + 1 < 15:
+            self.updateAdjacenyOfTile(row + 1, col)
+        if row - 1 >= 0:
+            self.updateAdjacenyOfTile(row - 1, col)
+
+        if row < 14 and self.boardState[row + 1][col].isEmpty():
             self.boardState[row + 1][col].setAnchor()
-        if self.boardState[row - 1][col].isEmpty():
+        if row > 0 and self.boardState[row - 1][col].isEmpty():
             self.boardState[row - 1][col].setAnchor()
-        if self.boardState[row][col + 1].isEmpty():
+        if col < 14 and self.boardState[row][col + 1].isEmpty():
             self.boardState[row][col + 1].setAnchor()
-        if self.boardState[row][col - 1].isEmpty():
+        if col > 0 and self.boardState[row][col - 1].isEmpty():
             self.boardState[row][col - 1].setAnchor()
         changeRow = row
 
         #if there is a word bellow, follow it and update the adj of the closest free space
-        if self.boardState[changeRow + 1][col].isNotEmpty():
-            while changeRow < 14:
+        if changeRow + 1 < 15 and self.boardState[changeRow + 1][col].isNotEmpty():
+            while changeRow < 13:
                 changeRow += 1
                 if self.boardState[changeRow + 1][col].isEmpty():
                     self.updateAdjacenyOfTile(changeRow + 1, col)
                     break
         #if there is a word above, follow it and update the adj of the closest free space
         changeRow = row
-        if self.boardState[changeRow - 1][col].isNotEmpty():
-            while changeRow > 0:
+        if changeRow - 1 >= 0 and self.boardState[changeRow - 1][col].isNotEmpty():
+            while changeRow > 1:
                 changeRow -= 1
                 if self.boardState[changeRow - 1][col].isEmpty():
                     self.updateAdjacenyOfTile(changeRow - 1, col)
@@ -165,14 +168,14 @@ class Board:
 
         else:
             #just tile above
-            if row > 0 and self.boardState[row - 1][col].isNotEmpty():
+            if row > 0 and row < 15 and self.boardState[row - 1][col].isNotEmpty():
                 wordStart = self._findWordStart(row - 1, col, 1)
                 hasUps = self.dictionary.lookupEndOptions(wordStart)
                 self.boardState[row][col].sideScore = self.wordToScore(wordStart)
                 if hasUps[0]:
                     options += hasUps[1]
             #just tile below
-            if row < 14 and self.boardState[row + 1][col].isNotEmpty():
+            if row < 14 and row >= 0 and self.boardState[row + 1][col].isNotEmpty():
                 wordEnd = self._findWordStart(row + 1, col, 3)
                 hasDowns = self.dictionary.lookupStartOptions(wordEnd)
                 self.boardState[row][col].sideScore = self.wordToScore(wordEnd)
@@ -246,7 +249,6 @@ class Board:
                                 raise Exception("Illegal word on board")
                             iterNode = iterNode.neighbors[currentSquare.get()]
                             adding = self.wordToScore(currentSquare.get())
-                            print("in list adding " + str(adding) + "to score of " + str(score.word))
                             score.word += adding
                         self.extendRight(wordStart, iterNode, rowIndex, colIndex, True, score)
                     else:
@@ -295,7 +297,7 @@ class Board:
         return multDict.get(valueCode, 1)
 
     def extendRight(self, partialWord, node, row, col, firstAnchor, score):
-        if row > 14:
+        if row > 14 or col > 14:
             return
         if self.boardState[row][col].isEmpty():
             if node.endsWord and not firstAnchor:
@@ -316,7 +318,6 @@ class Board:
                     workingScore.sideParts += sidePartScore
                     workingScore.wordMultiplier *= wordMult
 
-                    print(str(workingScore.word) + " adding " + str(letterScore) + " for " + str(e) + " at word " + partialWord)
                     self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, copy.deepcopy(workingScore))
                     self.robotRack.append(e)
         else:
@@ -324,7 +325,15 @@ class Board:
                 score.word += self.wordToScore(self.boardState[row][col].get())
                 self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, copy.deepcopy(score))
 
+    def leftValue(self, partialWord, row, col, score):
+        for i in range(len(partialWord)):
+            square = self.boardState[row][col + i - len(partialWord)]
+            score.word += self.letterMupltiplier(square.special) * self.wordToScore(partialWord[i])
+            score.wordMultiplier *= self.wordMultiplier(square.special)
+
     def leftPart(self, partialWord, node, limit, row, col, score):
+        # potential doesnt do anything
+        self.leftValue(partialWord, row, col, score)
         self.extendRight(partialWord, node, row, col, True, score)
         if limit > 0:
             for e in node.neighbors:
@@ -332,12 +341,5 @@ class Board:
                 if e in self.robotRack:
                     self.robotRack.remove(e)
 
-                    letterScoreNoMult = self.letterMupltiplier(self.boardState[row][col].special) * self.wordToScore(e)
-                    wordMult = self.wordMultiplier(self.boardState[row][col].special)
-
-                    workingScore.word += letterScoreNoMult
-                    workingScore.wordMultiplier *= wordMult
-
-                    print(str(workingScore.word) + " In left part adding " + str(letterScoreNoMult) + " for " + str(e) + " at word " + partialWord)
-                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col, copy.deepcopy(workingScore))
+                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col, Score.Score())
                     self.robotRack.append(e)

@@ -8,9 +8,9 @@ class Move:
 
     def __str__(self):
         if self.isHorizontal:
-            return "Horizontal word: " + self.word + " ending at: " + str(self.row) + ", " + str(self.col) + " word score: " + str(self.score.word) + " side: " + str(self.score.sideParts) + " and mult: " + str(self.score.wordMultiplier)
+            return "Horizontal word: " + self.word + " ending at: " + str(self.row) + ", " + str(self.col) + " total score: " + str(self.score.totalVal())
         else:
-            return "Vertical word: " + self.word + " ending at: " + str(self.row) + ", " + str(self.col) + " word score: " + str(self.score.word) + " side: " + str(self.score.sideParts) + " and mult: " + str(self.score.wordMultiplier)
+            return "Vertical word: " + self.word + " ending at: " + str(self.row) + ", " + str(self.col) + " total score: " + str(self.score.totalVal())
     def transpose(self):
         temp = self.row
         self.row = self.col

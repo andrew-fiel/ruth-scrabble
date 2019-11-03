@@ -246,7 +246,7 @@ class Board:
                                 raise Exception("Illegal word on board")
                             iterNode = iterNode.neighbors[currentSquare.get()]
                             adding = self.wordToScore(currentSquare.get())
-                            print("in list adding " + str(adding))
+                            print("in list adding " + str(adding) + "to score of " + str(score.word))
                             score.word += adding
                         self.extendRight(wordStart, iterNode, rowIndex, colIndex, True, score)
                     else:
@@ -282,9 +282,15 @@ class Board:
 
     def letterMupltiplier(self, valueCode):
         multDict = {
-            'NA': 1,
             'DL': 2,
             'TL': 3
+        }
+        return multDict.get(valueCode, 1)
+
+    def wordMultiplier(self, valueCode):
+        multDict = {
+            'DW': 2,
+            'TW': 3
         }
         return multDict.get(valueCode, 1)
 
@@ -297,14 +303,21 @@ class Board:
                 foundMove = Move.Move(partialWord, row, col - 1, score)
                 self.moveList.append(foundMove)
             for e in node.neighbors:
+                workingScore = copy.deepcopy(score)
                 if e in self.robotRack and self.crossCheckContains(e, row, col):
                     self.robotRack.remove(e)
+
+                    #calculate score additions
                     letterScore = self.letterMupltiplier(self.boardState[row][col].special) * self.wordToScore(e)
                     sidePartScore = self.boardState[row][col].sideScore
-                    score.word += letterScore
-                    score.sideParts += sidePartScore
-                    print(str(score.word) + " adding " + str(letterScore) + " for " + str(e) + " at word " + partialWord)
-                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, copy.deepcopy(score))
+                    wordMult = self.wordMultiplier(self.boardState[row][col].special)
+
+                    workingScore.word += letterScore
+                    workingScore.sideParts += sidePartScore
+                    workingScore.wordMultiplier *= wordMult
+
+                    print(str(workingScore.word) + " adding " + str(letterScore) + " for " + str(e) + " at word " + partialWord)
+                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, copy.deepcopy(workingScore))
                     self.robotRack.append(e)
         else:
             if self.boardState[row][col].get() in node.neighbors:
@@ -315,9 +328,16 @@ class Board:
         self.extendRight(partialWord, node, row, col, True, score)
         if limit > 0:
             for e in node.neighbors:
+                workingScore = copy.deepcopy(score)
                 if e in self.robotRack:
                     self.robotRack.remove(e)
-                    letterScoreNoMult = self.wordToScore(self.boardState[row][col].get())
-                    score.word += letterScoreNoMult
-                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col, copy.deepcopy(score))
+
+                    letterScoreNoMult = self.letterMupltiplier(self.boardState[row][col].special) * self.wordToScore(e)
+                    wordMult = self.wordMultiplier(self.boardState[row][col].special)
+
+                    workingScore.word += letterScoreNoMult
+                    workingScore.wordMultiplier *= wordMult
+
+                    print(str(workingScore.word) + " In left part adding " + str(letterScoreNoMult) + " for " + str(e) + " at word " + partialWord)
+                    self.leftPart(partialWord + e, node.neighbors[e], limit - 1, row, col, copy.deepcopy(workingScore))
                     self.robotRack.append(e)

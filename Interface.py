@@ -20,6 +20,7 @@ class Ruth:
         for move in self.verticalBoard.moveList:
             move.transpose()
         playList = self.horizontalBoard.moveList + self.verticalBoard.moveList
+        list.sort(playList, key=lambda play: play.score.totalVal(), reverse = True)
         return playList
 
     def _setRack(self, rack):

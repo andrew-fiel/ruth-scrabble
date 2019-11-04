@@ -113,6 +113,17 @@ class Board:
             returnString += "|\n"
         print(returnString)
 
+    def reset(self):
+        for row in range(15):
+            for col in range(15):
+                self.adjacentBitVector[row][col] = 67108863
+                self.boardState[row][col].letter = ""
+                self.boardState[row][col].anchor = False
+                self.boardState[row][col].sideScore = 0
+        self.robotRack = []
+        self.moveList = []
+
+
     def getBoardState(self):
         return self.boardState
 
@@ -239,6 +250,7 @@ class Board:
             for colIndex in range(len(self.boardState[0])):
                 if self.boardState[rowIndex][colIndex].isAnchor():
                     score = Score.Score()
+                    #case anchor immediately right of extant letter
                     if colIndex > 0 and self.boardState[rowIndex][colIndex - 1].isNotEmpty():
                         iterNode = self.dictionary.root
                         # 4 means look left
@@ -315,7 +327,9 @@ class Board:
                     wordMult = self.wordMultiplier(self.boardState[row][col].special)
 
                     workingScore.word += letterScore
-                    workingScore.sideParts += sidePartScore
+                    #if a side word is made, add value for those tiles and for the added again
+                    if sidePartScore > 0:
+                        workingScore.sideParts += sidePartScore + self.wordToScore(e)
                     workingScore.wordMultiplier *= wordMult
 
                     self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, copy.deepcopy(workingScore))

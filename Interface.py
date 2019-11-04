@@ -1,5 +1,6 @@
 import Board
 import random
+import Move
 
 class Ruth:
     def __init__(self):
@@ -15,6 +16,10 @@ class Ruth:
             self.horizontalBoard.addTile(letter, row, col)
             #vertical words found with transpose of horizontal board state
             self.verticalBoard.addTile(letter, col, row)
+
+    def reset(self):
+        self.horizontalBoard.reset()
+        self.verticalBoard.reset()
 
     def _generatePlayList(self):
         self.horizontalBoard.listPlays()
@@ -41,6 +46,9 @@ class Ruth:
 
         random.shuffle(self.availableTiles)
 
+        #play of the game placeholder with score 0
+        potg = Move.Move("", 7, 7)
+
         compRack = []
         scorecount = 0
         while len(self.availableTiles) > 0:
@@ -57,11 +65,14 @@ class Ruth:
 
             if len(options) > 0:
                 bestValueMove = options[0]
-                print(bestValueMove)
                 self.makePlay(bestValueMove, compRack)
                 scorecount += bestValueMove.score.totalVal()
-                print(self)
-        print(scorecount)
+                if bestValueMove.score.totalVal() > potg.score.totalVal():
+                    potg = bestValueMove
+            else:
+                break
+        self.reset()
+        return potg
 
     def makePlay(self, move, rack):
         #starting row/col correction
@@ -78,11 +89,42 @@ class Ruth:
                 move.col += 1
             else:
                 move.row += 1
+        if move.isHorizontal:
+            move.col -= 1
+        else:
+            move.row -= 1
 
-
+    def printMap(self, map):
+        returnString = ""
+        for row in map:
+            for unit in row:
+                returnString += '|' + str(unit)
+            returnString += "|\n"
+        print(returnString)
 
 
 
 if __name__ == '__main__':
     game = Ruth()
-    game._simulateGame()
+    heatmap = [[0 for x in range(15)] for y in range(15)]
+    for i in range(10):
+        print("Starting game " + str(i))
+        move = game._simulateGame()
+
+        if move.isHorizontal:
+            move.col -= len(move.word) - 1
+        else:
+            move.row -= len(move.word) - 1
+
+        for l in range(len(move.word)):
+            heatmap[move.row][move.col] += 1
+            if move.isHorizontal:
+                move.col += 1
+            else:
+                move.row += 1
+        if move.isHorizontal:
+            move.col -= 1
+        else:
+            move.row -= 1
+        print("Game " + str(i) + " finished")
+    game.printMap(heatmap)

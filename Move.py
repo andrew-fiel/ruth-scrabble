@@ -1,5 +1,7 @@
+import Score
+
 class Move:
-    def __init__(self, word, row, col, score):
+    def __init__(self, word, row, col, score = Score.Score()):
         self.word = word
         self.row = row
         self.col = col

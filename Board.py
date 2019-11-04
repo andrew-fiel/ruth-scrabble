@@ -87,7 +87,7 @@ class Board:
         for row in self.adjacentBitVector:
             for unit in row:
                 value = 0
-                if unit != 0:
+                if unit != 67108863:
                     value = 1
                 returnString += '|' + str(value)
             returnString += "|\n"

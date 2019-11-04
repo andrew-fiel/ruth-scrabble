@@ -97,7 +97,13 @@ class Dawg:
             if letter not in node.neighbors:
                 return False, []
             node = node.neighbors[letter]
-        return True, node.neighbors.keys()
+        keys = node.neighbors.keys()
+        #found all options now look for ends
+        goodkeys = []
+        for key in keys:
+            if node.neighbors[key].endsWord:
+                goodkeys.append(key)
+        return True, goodkeys
 
     def lookupStartOptions(self, wordEnd):
         wordEnd = wordEnd.upper()

@@ -1,4 +1,4 @@
-# ruth-scrabble
+# Ruth-Scrabble
 This project is being built with the intention of eventually running on an Arduino-run physical Scrabble board. "Ruth" is my grandma, who plays a lot of Scrabble, but does not often have opponents to play against.
 
 ## Sources That Helped

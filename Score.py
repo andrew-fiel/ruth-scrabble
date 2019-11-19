@@ -6,3 +6,6 @@ class Score:
 
     def totalVal(self):
         return self.word * self.wordMultiplier + self.sideParts
+
+    def cheapishCopy(self):
+        return Score(self.word, self.wordMultiplier, self.sideParts)

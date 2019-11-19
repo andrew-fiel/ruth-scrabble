@@ -317,7 +317,8 @@ class Board:
                 foundMove = Move.Move(partialWord, row, col - 1, score)
                 self.moveList.append(foundMove)
             for e in node.neighbors:
-                workingScore = copy.deepcopy(score)
+                #workingScore = copy.deepcopy(score)
+                workingScore = score.cheapishCopy()
                 if e in self.robotRack and self.crossCheckContains(e, row, col):
                     self.robotRack.remove(e)
 
@@ -332,12 +333,14 @@ class Board:
                         workingScore.sideParts += sidePartScore + self.wordToScore(e)
                     workingScore.wordMultiplier *= wordMult
 
-                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, copy.deepcopy(workingScore))
+                    #self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, copy.deepcopy(workingScore))
+                    self.extendRight(partialWord + e, node.neighbors[e], row, col + 1, False, workingScore.cheapishCopy())
                     self.robotRack.append(e)
         else:
             if self.boardState[row][col].get() in node.neighbors:
                 score.word += self.wordToScore(self.boardState[row][col].get())
-                self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, copy.deepcopy(score))
+                #self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, copy.deepcopy(score))
+                self.extendRight(partialWord + self.boardState[row][col].get(), node.neighbors[self.boardState[row][col].get()], row, col + 1, False, score.cheapishCopy())
 
     def leftValue(self, partialWord, row, col, score):
         for i in range(len(partialWord)):
@@ -351,7 +354,8 @@ class Board:
         self.extendRight(partialWord, node, row, col, True, score)
         if limit > 0:
             for e in node.neighbors:
-                workingScore = copy.deepcopy(score)
+                #workingScore = copy.deepcopy(score)
+                workingScore = score.cheapishCopy()
                 if e in self.robotRack:
                     self.robotRack.remove(e)
 

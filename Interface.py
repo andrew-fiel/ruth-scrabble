@@ -1,6 +1,9 @@
 import Board
 import random
 import Move
+import matplotlib.pyplot as plt
+import numpy as np
+import time
 
 class Ruth:
     def __init__(self):
@@ -34,7 +37,7 @@ class Ruth:
         self.horizontalBoard.robotRack = rack
         self.verticalBoard.robotRack = rack
 
-    def _simulateGame(self):
+    def _simulateGame(self, verbose = False):
         #first play is on center square
         self.horizontalBoard.boardState[7][7].setAnchor()
         self.verticalBoard.boardState[7][7].setAnchor()
@@ -66,12 +69,17 @@ class Ruth:
             if len(options) > 0:
                 bestValueMove = options[0]
                 self.makePlay(bestValueMove, compRack)
+                if verbose:
+                    print(self.horizontalBoard)
+                    print("With play: " + str(options[0]))
                 scorecount += bestValueMove.score.totalVal()
                 if bestValueMove.score.totalVal() > potg.score.totalVal():
                     potg = bestValueMove
             else:
                 break
         self.reset()
+        if verbose:
+            print("Total Score: " + str(scorecount))
         return potg
 
     def makePlay(self, move, rack):
@@ -102,29 +110,44 @@ class Ruth:
             returnString += "|\n"
         print(returnString)
 
+    def displayMap(self, map):
+        array = np.asarray(map)
+        plt.imshow(array, cmap='hot', interpolation='nearest')
+        plt.show()
+
+    def makeHeatMap(self, size):
+        """plays "size" games to produce an output where each number represents
+         the number of times a game's best move used that tile"""
+        time1 = time.time()
+        heatmap = [[0 for x in range(15)] for y in range(15)]
+        for i in range(size):
+            print("Starting game " + str(i))
+            move = self._simulateGame()
+
+            if move.isHorizontal:
+                move.col -= len(move.word) - 1
+            else:
+                move.row -= len(move.word) - 1
+
+            for l in range(len(move.word)):
+                heatmap[move.row][move.col] += 1
+                if move.isHorizontal:
+                    move.col += 1
+                else:
+                    move.row += 1
+            if move.isHorizontal:
+                move.col -= 1
+            else:
+                move.row -= 1
+            print("Game " + str(i) + " finished")
+        time2 = time.time()
+        print("Running time: " + str(time2 - time1))
+        self.displayMap(heatmap)
+
 
 
 if __name__ == '__main__':
     game = Ruth()
-    heatmap = [[0 for x in range(15)] for y in range(15)]
-    for i in range(10):
-        print("Starting game " + str(i))
-        move = game._simulateGame()
-
-        if move.isHorizontal:
-            move.col -= len(move.word) - 1
-        else:
-            move.row -= len(move.word) - 1
-
-        for l in range(len(move.word)):
-            heatmap[move.row][move.col] += 1
-            if move.isHorizontal:
-                move.col += 1
-            else:
-                move.row += 1
-        if move.isHorizontal:
-            move.col -= 1
-        else:
-            move.row -= 1
-        print("Game " + str(i) + " finished")
-    game.printMap(heatmap)
+    game._simulateGame(True)
+    #game.makeHeatMap(1000)
+    #game.displayMap()

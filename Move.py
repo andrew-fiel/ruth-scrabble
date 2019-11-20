@@ -16,6 +16,8 @@ class Move:
         else:
             returnstr += "Vertical word: "
         returnstr += (self.word +
+                      " of tile count: " +
+                      str(self.score.tilesUsed) +
                       " ending at: " +
                       str(self.row) +
                       ", " +

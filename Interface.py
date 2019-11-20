@@ -30,7 +30,7 @@ class Ruth:
         self.verticalBoard.listPlays()
         for move in self.verticalBoard.moveList:
             move.transpose()
-        playList = self.verticalBoard.moveList + self.horizontalBoard.moveList
+        playList = self.horizontalBoard.moveList + self.verticalBoard.moveList
         list.sort(playList, key=lambda play: play.score.totalVal(), reverse=True)
         return playList
 
@@ -178,6 +178,6 @@ class Ruth:
 
 if __name__ == '__main__':
     game = Ruth()
-    game.simulateGame(True)
-    # game.makeHeatMap(1000)
+    # game.simulateGame(True)
+    game.makeHeatMap(1000)
     # game.displayMap()

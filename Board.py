@@ -340,6 +340,8 @@ class Board:
                         workingScore.sideParts += sidePartScore + self._wordToScore(e)
                     workingScore.wordMultiplier *= wordMult
 
+                    workingScore.tilesUsed += 1
+
                     self._extendRight(partialWord + e,
                                       node.neighbors[e],
                                       row,
@@ -364,6 +366,7 @@ class Board:
             score.word += (self._letterMultiplier(square.special) *
                            self._wordToScore(partialWord[i]))
             score.wordMultiplier *= self._wordMultiplier(square.special)
+        score.tilesUsed = len(partialWord)
 
     def _leftPart(self, partialWord, node, limit, row, col, score):
         """Create options for left part"""

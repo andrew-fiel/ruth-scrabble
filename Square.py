@@ -1,16 +1,16 @@
 class Square:
 
-    def __init__(self, letter = "", special = "NA"):
+    def __init__(self, letter="", special="NA"):
         self.letter = letter
         self.anchor = False
         self.sideScore = 0
 
-        #SPECIAL SQUARE VALUES
-        #NA -- None / Regular Tile
-        #DL -- Double Letter Score
-        #TL -- Triple Letter Score
-        #DW -- Double Word Score
-        #TW -- Triple Word Score
+        # SPECIAL SQUARE VALUES
+        # NA -- None / Regular Tile
+        # DL -- Double Letter Score
+        # TL -- Triple Letter Score
+        # DW -- Double Word Score
+        # TW -- Triple Word Score
 
         self.special = special
 
@@ -29,7 +29,7 @@ class Square:
     def isAnchor(self):
         return self.anchor
 
-    def setAnchor(self, isAnchor = True):
+    def setAnchor(self, isAnchor=True):
         self.anchor = isAnchor
         if self.isNotEmpty():
             self.anchor = False

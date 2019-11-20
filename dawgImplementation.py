@@ -1,5 +1,6 @@
 import string
 
+
 class Node:
     nodeID = 0
 
@@ -9,8 +10,8 @@ class Node:
         self.endsWord = False
         self.neighbors = {}
 
-    # makes a string representation of each Node using children's strings too
     def __str__(self):
+        """makes a string representation of each Node using children's strings too"""
         listRepresent = []
         if self.endsWord:
             listRepresent.append("1")
@@ -27,6 +28,7 @@ class Node:
     def __eq__(self, other):
         return self.__str__() == other.__str__()
 
+
 # Structure that holds nodes
 class Dawg:
     def __init__(self):
@@ -38,25 +40,25 @@ class Dawg:
     def insert(self, word):
         if word < self.previousWord:
             raise Exception("Error: Words not listed alphabetically")
-        #find prefix from previous
+        # find prefix from previous
         numLetterInCommon = 0
-        for i in range (min(len(word), len(self.previousWord))):
+        for i in range(min(len(word), len(self.previousWord))):
             if word[i] != self.previousWord[i]:
                 break
             numLetterInCommon += 1
 
         self._removeRedundantNodes(numLetterInCommon)
 
-        #since first part of word already maybe exists, add remainder
+        # since first part of word already maybe exists, add remainder
 
         if len(self.freshNodes) == 0:
-            #if no freshnodes, tempnode is root
+            # if no freshnodes, tempnode is root
             tempNode = self.root
         else:
-            #set tempnode to last freshnode's next node
+            # set tempnode to last freshnode's next node
             tempNode = self.freshNodes[-1][2]
 
-        #every letter not added already goes to freshnodes
+        # every letter not added already goes to freshnodes
         for letter in word[numLetterInCommon:]:
             nextNode = Node()
             tempNode.neighbors[letter] = nextNode
@@ -67,11 +69,11 @@ class Dawg:
         self.previousWord = word
 
     def finish(self):
-        #remove all redundant Nodes
+        # remove all redundant Nodes
         self._removeRedundantNodes(0)
 
     def _removeRedundantNodes(self, until):
-        for i in range (len(self.freshNodes) - 1, until - 1, -1):
+        for i in range(len(self.freshNodes) - 1, until - 1, -1):
             (parent, letter, child) = self.freshNodes[i]
             if child in self.trimmedNodes:
                 parent.neighbors[letter] = self.trimmedNodes[child]
@@ -98,7 +100,7 @@ class Dawg:
                 return False, []
             node = node.neighbors[letter]
         keys = node.neighbors.keys()
-        #found all options now look for ends
+        # found all options now look for ends
         goodkeys = []
         for key in keys:
             if node.neighbors[key].endsWord:

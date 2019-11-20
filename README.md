@@ -5,8 +5,10 @@ This project is being built with the intention of eventually running on an Ardui
 - Scrabble algorithm based on [this paper](https://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf).
 - DAWG implementation based on [this](https://gist.github.com/smhanov/94230b422c2100ae4218).
 ## Heatmap
-This heatmap represents the locations of tiles from the highest scoring words in 1000 games played with one rack. On average, the games took 1.614 seconds each.
+This heatmap represents the locations of tiles from the highest scoring words in 1000 games played with one rack. On average, the games took 1.296 seconds each.
 ![1000bettergames](https://user-images.githubusercontent.com/43427035/69286614-f1f90580-0bb0-11ea-90cf-3eb3ce8e9ce3.png)
+
+The darker the tile, the fewer instances of its involvenment in a game's highest scoring move. The lowest scoring tile had a score of 16. The center square, the highest scoring, had a score of 106.
 
 The following variation explicitly marks special-value tiles.
 

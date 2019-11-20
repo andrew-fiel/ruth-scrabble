@@ -6,7 +6,7 @@ This project is being built with the intention of eventually running on an Ardui
 - DAWG implementation based on [this](https://gist.github.com/smhanov/94230b422c2100ae4218).
 ## Heatmap
 This heatmap represents the locations of tiles from the highest scoring words in 1000 games played with one rack. On average, the games took 1.614 seconds each.
-![image](https://user-images.githubusercontent.com/43427035/68968958-06986080-07a1-11ea-97e9-c7406481d400.png)
+![1000bettergames](https://user-images.githubusercontent.com/43427035/69286614-f1f90580-0bb0-11ea-90cf-3eb3ce8e9ce3.png)
 
 The following variation explicitly marks special-value tiles.
 
@@ -18,4 +18,4 @@ DW = Double Word Score
 
 TW = Triple Word Score
 
-![1000gamesedit](https://user-images.githubusercontent.com/43427035/69106561-0233a800-0a2c-11ea-8a94-a95874cceccb.png)
+![1000bettergamesedit](https://user-images.githubusercontent.com/43427035/69286650-063d0280-0bb1-11ea-9c0a-8c72299c96ac.png)

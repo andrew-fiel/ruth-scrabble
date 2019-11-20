@@ -12,12 +12,12 @@ The darker the tile, the fewer instances of its involvenment in a game's highest
 
 The following variation explicitly marks special-value tiles.
 
-DL = Double Letter Score
+**DL** = Double Letter Score
 
-TL = Triple Letter Score
+**TL** = Triple Letter Score
 
-DW = Double Word Score
+**DW** = Double Word Score
 
-TW = Triple Word Score
+**TW** = Triple Word Score
 
 ![1000bettergamesedit](https://user-images.githubusercontent.com/43427035/69286650-063d0280-0bb1-11ea-9c0a-8c72299c96ac.png)
